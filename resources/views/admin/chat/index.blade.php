@@ -81,7 +81,7 @@
 @push('scripts')
 <script>
 (function () {
-    const cfg = @json(['url' => route('admin.chat.messages', $active->id), 'send' => route('admin.chat.send', $active->id)]);
+    const cfg = {{ Illuminate\Support\Js::from(['url' => route('admin.chat.messages', $active->id), 'send' => route('admin.chat.send', $active->id)]) }};
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
     const box = document.getElementById('msgBox');
     const olderBtn = document.getElementById('olderBtn');

@@ -12,6 +12,9 @@ use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\FinanceReportController;
+use App\Http\Controllers\Admin\InventoryReportController;
+use App\Http\Controllers\Admin\TechnicianPerformanceController;
 
 Route::get('/', function () {
     return redirect()->route('admin.login');
@@ -21,18 +24,18 @@ Route::get('/', function () {
 Route::get('/payment/finish', function () {
     return response(
         '<!doctype html><html lang="id"><head><meta charset="utf-8">'
-        .'<meta name="viewport" content="width=device-width, initial-scale=1">'
-        .'<title>Pembayaran</title></head>'
-        .'<body style="font-family:sans-serif;text-align:center;padding:48px 24px">'
-        .'<h2>Pembayaran sedang diproses</h2>'
-        .'<p>Silakan kembali ke aplikasi reaple.id.</p></body></html>'
+            . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            . '<title>Pembayaran</title></head>'
+            . '<body style="font-family:sans-serif;text-align:center;padding:48px 24px">'
+            . '<h2>Pembayaran sedang diproses</h2>'
+            . '<p>Silakan kembali ke aplikasi reaple.id.</p></body></html>'
     );
 });
 
 // ======================= Admin Panel =======================
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/', fn () => redirect()->route('admin.dashboard'));
+    Route::get('/', fn() => redirect()->route('admin.dashboard'));
     Route::get('login', [LoginController::class, 'show'])->name('login');
     Route::post('login', [LoginController::class, 'login'])->middleware('throttle:5,1')->name('login.submit');
 
@@ -69,7 +72,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('technicians/{id}', [TechnicianController::class, 'destroy'])->whereNumber('id')->name('technicians.destroy');
 
         // B9 dan B10 menambahkan route di sini.
-                // ---------- Barang & Stok (B9) ----------
+        // ---------- Barang & Stok (B9) ----------
         Route::get('products', [ProductController::class, 'index'])->name('products.index');
         Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
         Route::post('products', [ProductController::class, 'store'])->name('products.store');
@@ -108,5 +111,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->whereNumber('userId')->middleware('throttle:60,1')->name('chat.send');
 
         // B10 menambahkan route laporan di sini.
+        // ---------- Laporan (B10) ----------
+        Route::get('reports/finance', [FinanceReportController::class, 'index'])->name('reports.finance');
+        Route::get('reports/finance/export', [FinanceReportController::class, 'export'])->name('reports.finance.export');
+        Route::post('reports/finance/expenses', [FinanceReportController::class, 'storeExpense'])
+            ->middleware('throttle:30,1')->name('reports.finance.expenses.store');
+        Route::delete('reports/finance/expenses/{id}', [FinanceReportController::class, 'destroyExpense'])
+            ->whereNumber('id')->name('reports.finance.expenses.destroy');
+
+        Route::get('reports/inventory', [InventoryReportController::class, 'index'])->name('reports.inventory');
+        Route::get('reports/inventory/export', [InventoryReportController::class, 'export'])->name('reports.inventory.export');
+
+        Route::get('reports/technicians', [TechnicianPerformanceController::class, 'index'])->name('reports.technicians');
+        Route::get('reports/technicians/export', [TechnicianPerformanceController::class, 'export'])->name('reports.technicians.export');
     });
 });

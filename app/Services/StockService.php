@@ -51,6 +51,7 @@ class StockService
                 FinanceTransaction::create([
                     'order_id' => null,
                     'type' => 'out',
+                    'category' => 'pembelian_stok',
                     'amount' => $cost,
                     'description' => "Pembelian stok {$variant->product->name} ({$variant->label()}) x{$qty}",
                     'transaction_date' => now()->toDateString(),

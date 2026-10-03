@@ -33,8 +33,7 @@ class PaymentService
     public function __construct(
         private readonly MidtransService $midtrans,
         private readonly OrderService $orders,
-    ) {
-    }
+    ) {}
 
     /**
      * Buat (atau ambil kembali) transaksi Snap untuk pesanan.
@@ -133,8 +132,10 @@ class PaymentService
             }
 
             // Status "settlement" tidak boleh diturunkan oleh notifikasi susulan.
-            if ($payment->status === 'settlement'
-                && in_array($status, ['pending', ...self::FAILED_STATUSES], true)) {
+            if (
+                $payment->status === 'settlement'
+                && in_array($status, ['pending', ...self::FAILED_STATUSES], true)
+            ) {
                 return $payment;
             }
 
@@ -205,8 +206,9 @@ class PaymentService
         FinanceTransaction::create([
             'order_id' => $order->id,
             'type' => 'in',
+            'category' => 'penjualan',
             'amount' => $order->total,
-            'description' => "Pembayaran pesanan {$order->order_code} via ".$this->methodLabel($payment->method),
+            'description' => "Pembayaran pesanan {$order->order_code} via " . $this->methodLabel($payment->method),
             'transaction_date' => $now->toDateString(),
         ]);
     }
@@ -224,7 +226,7 @@ class PaymentService
         $variants = ProductVariant::whereIn('id', $variantIds)->lockForUpdate()->get()->keyBy('id');
 
         $spareparts = $order->items->filter(
-            fn ($item) => $item->product_variant_id && $item->product?->type === ProductType::Sparepart
+            fn($item) => $item->product_variant_id && $item->product?->type === ProductType::Sparepart
         );
 
         foreach ($spareparts as $item) {
@@ -261,12 +263,12 @@ class PaymentService
 
     private function buildParams(Order $order, int $remainingSeconds): array
     {
-        $items = $order->items->map(fn ($item) => [
-            'id' => 'ITEM-'.$item->id,
+        $items = $order->items->map(fn($item) => [
+            'id' => 'ITEM-' . $item->id,
             // Midtrans: harga item = harga barang + ongkir/pengecekan, supaya total item = gross_amount.
             'price' => (int) $item->price + (int) $item->base_fee,
             'quantity' => (int) $item->qty,
-            'name' => Str::limit(trim($item->product_name.' '.$item->variant_label), 50, ''),
+            'name' => Str::limit(trim($item->product_name . ' ' . $item->variant_label), 50, ''),
         ])->values()->all();
 
         return [
@@ -309,7 +311,7 @@ class PaymentService
         return match (true) {
             $type === null => null,
             $type === 'bank_transfer' => isset($n['va_numbers'][0]['bank'])
-                ? strtolower($n['va_numbers'][0]['bank']).'_va'
+                ? strtolower($n['va_numbers'][0]['bank']) . '_va'
                 : (isset($n['permata_va_number']) ? 'permata_va' : 'bank_transfer'),
             $type === 'cstore' => strtolower((string) ($n['store'] ?? 'cstore')),
             default => (string) $type, // echannel, dll.

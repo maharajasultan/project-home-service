@@ -94,7 +94,24 @@
 <body>
     @php
     $menu = [
+    ['section' => 'Utama'],
+    ['Dashboard', 'bi-speedometer2', 'admin.dashboard', 'admin.dashboard'],
+    ['section' => 'Transaksi'],
+    ['Transaksi', 'bi-receipt', 'admin.transactions.index', 'admin.transactions.*'],
+    ['Klaim Garansi', 'bi-shield-check', 'admin.warranty.index', 'admin.warranty.*', $pendingClaimsCount ?? 0],
+    ['section' => 'Pengguna'],
+    ['Pelanggan', 'bi-people', 'admin.users.index', 'admin.users.*'],
+    ['Teknisi', 'bi-person-gear', 'admin.technicians.index', 'admin.technicians.*'],
+    ['section' => 'Katalog'],
+    ['Barang & Stok', 'bi-box-seam', 'admin.products.index', 'admin.products.*'],
+    ['Banner', 'bi-images', 'admin.banners.index', 'admin.banners.*'],
+    ['Ulasan', 'bi-star', 'admin.reviews.index', 'admin.reviews.*'],
     ['Chat', 'bi-chat-dots', 'admin.chat.index', 'admin.chat.*', $unreadChatCount ?? 0],
+    ['section' => 'Laporan'],
+    ['Laporan Keuangan', 'bi-cash-coin', 'admin.reports.finance', 'admin.reports.finance*'],
+    ['Laporan Inventory', 'bi-boxes', 'admin.reports.inventory', 'admin.reports.inventory*'],
+    ['Kinerja Teknisi', 'bi-graph-up', 'admin.reports.technicians', 'admin.reports.technicians*'],
+    ];
     @endphp
 
     <div class="d-flex">
