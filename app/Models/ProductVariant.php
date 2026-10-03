@@ -41,6 +41,11 @@ class ProductVariant extends Model
         return $this->hasMany(StockMovement::class);
     }
 
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     /** Label ringkas untuk snapshot order, contoh: "iPhone 13 - Premium". */
     public function label(): string
     {

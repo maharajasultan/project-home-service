@@ -7,6 +7,11 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WarrantyClaimController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\ChatController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Admin\ReviewController;
 
 Route::get('/', function () {
     return redirect()->route('admin.login');
@@ -64,5 +69,44 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('technicians/{id}', [TechnicianController::class, 'destroy'])->whereNumber('id')->name('technicians.destroy');
 
         // B9 dan B10 menambahkan route di sini.
+                // ---------- Barang & Stok (B9) ----------
+        Route::get('products', [ProductController::class, 'index'])->name('products.index');
+        Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
+        Route::post('products', [ProductController::class, 'store'])->name('products.store');
+        Route::get('products/{id}/edit', [ProductController::class, 'edit'])->whereNumber('id')->name('products.edit');
+        Route::put('products/{id}', [ProductController::class, 'update'])->whereNumber('id')->name('products.update');
+        Route::post('products/{id}/toggle', [ProductController::class, 'toggle'])->whereNumber('id')->name('products.toggle');
+        Route::delete('products/{id}', [ProductController::class, 'destroy'])->whereNumber('id')->name('products.destroy');
+
+        Route::get('products/{id}/variants', [ProductVariantController::class, 'index'])->whereNumber('id')->name('products.variants');
+        Route::post('products/{id}/variants/generate', [ProductVariantController::class, 'generate'])->whereNumber('id')->name('products.variants.generate');
+        Route::post('products/{id}/variants/duration', [ProductVariantController::class, 'storeDuration'])->whereNumber('id')->name('products.variants.duration');
+        Route::patch('products/{id}/variants/prices', [ProductVariantController::class, 'updatePrices'])->whereNumber('id')->name('products.variants.prices');
+        Route::post('products/{id}/variants/{variantId}/stock', [ProductVariantController::class, 'adjustStock'])
+            ->whereNumber(['id', 'variantId'])->name('products.variants.stock');
+        Route::delete('products/{id}/variants/{variantId}', [ProductVariantController::class, 'destroy'])
+            ->whereNumber(['id', 'variantId'])->name('products.variants.destroy');
+
+        // ---------- Banner (B9) ----------
+        Route::get('banners', [BannerController::class, 'index'])->name('banners.index');
+        Route::get('banners/create', [BannerController::class, 'create'])->name('banners.create');
+        Route::post('banners', [BannerController::class, 'store'])->name('banners.store');
+        Route::get('banners/{id}/edit', [BannerController::class, 'edit'])->whereNumber('id')->name('banners.edit');
+        Route::put('banners/{id}', [BannerController::class, 'update'])->whereNumber('id')->name('banners.update');
+        Route::post('banners/{id}/toggle', [BannerController::class, 'toggle'])->whereNumber('id')->name('banners.toggle');
+        Route::delete('banners/{id}', [BannerController::class, 'destroy'])->whereNumber('id')->name('banners.destroy');
+
+        // ---------- Ulasan (B9) ----------
+        Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+        Route::patch('reviews/{id}/reply', [ReviewController::class, 'reply'])->whereNumber('id')->name('reviews.reply');
+        Route::delete('reviews/{id}', [ReviewController::class, 'destroy'])->whereNumber('id')->name('reviews.destroy');
+
+        // ---------- Chat (B9) ----------
+        Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
+        Route::get('chat/{userId}/messages', [ChatController::class, 'messages'])->whereNumber('userId')->name('chat.messages');
+        Route::post('chat/{userId}/messages', [ChatController::class, 'send'])
+            ->whereNumber('userId')->middleware('throttle:60,1')->name('chat.send');
+
+        // B10 menambahkan route laporan di sini.
     });
 });
