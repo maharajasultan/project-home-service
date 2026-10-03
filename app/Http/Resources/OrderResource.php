@@ -22,6 +22,8 @@ class OrderResource extends JsonResource
 
         $reviewed = $this->relationLoaded('reviews') && $this->reviews->isNotEmpty();
         $completed = $status === OrderStatus::Completed;
+        $hasPendingClaim = $this->relationLoaded('warrantyClaims')
+            && $this->warrantyClaims->where('status', 'pending')->isNotEmpty();
 
         return [
             'id' => $this->id,
@@ -88,8 +90,9 @@ class OrderResource extends JsonResource
                 'after' => $this->photos->where('type', 'after')->map(fn($p) => $p->url)->values(),
             ]),
             'can_review' => $completed && ! $reviewed,
-            'can_claim_warranty' => $completed && $reviewed && $this->isUnderWarranty(),
+            'can_claim_warranty' => $completed && $reviewed && $this->isUnderWarranty() && ! $hasPendingClaim,
             'warranty_valid_until' => $completed ? $this->warrantyValidUntil()?->toIso8601String() : null,
+            'has_pending_claim' => $hasPendingClaim,
 
             'created_at' => $this->created_at?->toIso8601String(),
         ];

@@ -3,16 +3,22 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\IphoneModelController;
 use App\Http\Controllers\Api\MidtransWebhookController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OrderTrackingController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\ServiceAreaController;
+use App\Http\Controllers\Api\TechnicianListController;
+use App\Http\Controllers\Api\WarrantyController;
+use App\Http\Controllers\Api\Technician\ChatController as TechnicianChatController;
 use App\Http\Controllers\Api\Technician\JobController;
 use App\Http\Controllers\Api\Technician\PhotoController;
+use App\Http\Controllers\Api\Technician\ReviewController as TechnicianReviewController;
 use App\Http\Controllers\Api\Technician\TrackingController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +48,9 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('auth/me', [AuthController::class, 'me']);
+
+        // Badge chat belum dibaca (B7)
+        Route::get('chat/unread-count', [ChatController::class, 'unreadCount'])->middleware('throttle:120,1');
 
         // ---------- Khusus role User (pelanggan) ----------
         Route::middleware('role:user')->group(function () {
@@ -73,7 +82,32 @@ Route::prefix('v1')->group(function () {
             Route::get('orders/{id}/tracking', [OrderTrackingController::class, 'show'])
                 ->whereNumber('id')->middleware('throttle:60,1');
 
-            // B7 (chat, review, garansi) menaruh route di sini.
+            // Chat (B7)
+            Route::get('chats', [ChatController::class, 'conversations'])->middleware('throttle:60,1');
+            Route::get('orders/{id}/chat/messages', [ChatController::class, 'orderMessages'])
+                ->whereNumber('id')->middleware('throttle:120,1');
+            Route::post('orders/{id}/chat/messages', [ChatController::class, 'sendOrderMessage'])
+                ->whereNumber('id')->middleware('throttle:30,1');
+            Route::get('chat/support/messages', [ChatController::class, 'supportMessages'])
+                ->middleware('throttle:120,1');
+            Route::post('chat/support/messages', [ChatController::class, 'sendSupportMessage'])
+                ->middleware('throttle:30,1');
+
+            // Ulasan (B7)
+            Route::get('orders/{id}/review', [ReviewController::class, 'show'])->whereNumber('id');
+            Route::post('orders/{id}/review', [ReviewController::class, 'store'])
+                ->whereNumber('id')->middleware('throttle:10,1');
+
+            // Garansi (B7)
+            Route::get('orders/{id}/warranty-claims', [WarrantyController::class, 'index'])->whereNumber('id');
+            Route::post('orders/{id}/warranty-claims', [WarrantyController::class, 'store'])
+                ->whereNumber('id')->middleware('throttle:5,1');
+
+            // Daftar teknisi (B7)
+            Route::get('technicians/top', [TechnicianListController::class, 'top']);
+            Route::get('technicians/{id}/reviews', [TechnicianListController::class, 'reviews'])->whereNumber('id');
+
+            // B8 dan seterusnya: profil user (F6) ditambahkan saat dibutuhkan.
         });
 
         // ---------- Khusus role Teknisi ----------
@@ -94,7 +128,17 @@ Route::prefix('v1')->group(function () {
             Route::delete('jobs/{id}/photos/{photoId}', [PhotoController::class, 'destroy'])
                 ->whereNumber('id')->whereNumber('photoId');
 
-            // B7 (chat teknisi dan balas ulasan) menaruh route di sini.
+            // Chat dengan pelanggan (B7)
+            Route::get('chats', [TechnicianChatController::class, 'conversations'])->middleware('throttle:60,1');
+            Route::get('jobs/{id}/chat/messages', [TechnicianChatController::class, 'messages'])
+                ->whereNumber('id')->middleware('throttle:120,1');
+            Route::post('jobs/{id}/chat/messages', [TechnicianChatController::class, 'send'])
+                ->whereNumber('id')->middleware('throttle:30,1');
+
+            // Ulasan dan balasan (B7)
+            Route::get('reviews', [TechnicianReviewController::class, 'index']);
+            Route::post('reviews/{id}/reply', [TechnicianReviewController::class, 'reply'])
+                ->whereNumber('id')->middleware('throttle:30,1');
         });
     });
 });

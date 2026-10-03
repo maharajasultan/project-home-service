@@ -15,6 +15,9 @@ class ReviewResource extends JsonResource
             'id' => $this->id,
             'rating' => (int) $this->rating,
             'comment' => $this->comment,
+            'target_type' => $this->target_type,
+            'target_id' => (int) $this->target_id,
+            'order_code' => $this->whenLoaded('order', fn() => $this->order?->order_code),
             'user' => [
                 'name' => $this->user?->name ?? 'Pengguna',
                 'avatar_url' => MediaUrl::resolve($this->user?->avatar),

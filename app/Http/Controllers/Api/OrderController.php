@@ -16,7 +16,7 @@ use App\Services\MidtransService;
 
 class OrderController extends Controller
 {
-    private const WITH = ['items', 'technician.technicianProfile', 'payment', 'reviews', 'photos'];
+    private const WITH = ['items', 'technician.technicianProfile', 'payment', 'reviews', 'photos', 'warrantyClaims'];
 
     public function __construct(private readonly OrderService $orders) {}
 
